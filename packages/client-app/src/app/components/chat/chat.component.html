@@ -1,0 +1,128 @@
+<div class="chat-container">
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title> Completion Options </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="options-form">
+      <form [formGroup]="completionOptionsForm" class="options-form">
+        <div class="options-line">
+          <mat-form-field appearance="fill">
+            <mat-label>Max Response Tokens</mat-label>
+            <input matInput type="number" formControlName="maxTokens" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Temperature</mat-label>
+            <input
+              matInput
+              type="number"
+              step="0.01"
+              formControlName="temperature"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Top P</mat-label>
+            <input matInput type="number" step="0.01" formControlName="topP" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Frequency Penalty</mat-label>
+            <input matInput type="number" formControlName="frequencyPenalty" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Presence Penalty</mat-label>
+            <input matInput type="number" formControlName="presencePenalty" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Stop</mat-label>
+            <input matInput type="text" formControlName="stop" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>System Message</mat-label>
+          <textarea
+            matInput
+            formControlName="systemMessage"
+            rows="2"
+          ></textarea>
+        </mat-form-field>
+      </form>
+      <div class="sound-toggle">
+        <mat-slide-toggle color="primary" [formControl]="enabledTextToSpeech">
+          TextToSpeech {{ enabledTextToSpeech.value ? 'Enabled' : 'Disabled' }}
+        </mat-slide-toggle>
+      </div>
+      <button mat-raised-button (click)="openDialog()">Show Messages JSON</button>
+    </div>
+  </mat-expansion-panel>
+  <div class="message-container" #scrollMe>
+    <mat-list class="messages">
+      <mat-list-item
+        *ngFor="let message of messagesSignal()"
+        [ngClass]="message.role"
+        class="message-item"
+      >
+        <div class="message">
+          <div>
+            <mat-icon>{{
+              message.role === 'user' ? 'person' : 'support_agent'
+            }}</mat-icon>
+          </div>
+          <div>{{ message.content }}</div>
+        </div>
+      </mat-list-item>
+      <mat-list-item *ngIf="waitingForResponse">
+        <mat-spinner diameter="20"></mat-spinner>
+      </mat-list-item>
+    </mat-list>
+  </div>
+
+  <div class="message-input">
+    <mat-form-field class="message-field" appearance="fill">
+      <textarea
+        matInput
+        [formControl]="userMessageControl"
+        placeholder="Type your message"
+        matTextareaAutosize
+        matAutosizeMinRows="1"
+        matAutosizeMaxRows="5"
+        (keydown.enter)="sendMessage(); $event.preventDefault()"
+      ></textarea>
+    </mat-form-field>
+    <button
+      mat-raised-button
+      color="primary"
+      class="send-button"
+      (click)="sendMessage()"
+      [disabled]="waitingForResponse"
+    >
+      Send
+    </button>
+  </div>
+  <button
+    mat-raised-button
+    color="warn"
+    class="clear-button"
+    (click)="clearMessages()"
+  >
+    Clear Chat
+  </button>
+</div>
+
+<dialog id="myDialog">
+  <div class="dialog-container">
+    <div class="dialog-header">
+      <h2>Messages JSON</h2>
+    </div>
+    <div class="dialog-content">
+      <pre>{{ messageContent }}</pre>
+    </div>
+    <div class="dialog-footer">
+      <button (click)="closeDialog()">Close</button>
+    </div>
+  </div>
+</dialog>
